@@ -22,15 +22,15 @@ type SearchBoxColumn() =
 
     member x.MappingName
         with get() = x.GetValue(MappingNameProperty) :?> string
-        and set(v) = x.SetValue(HeaderTextProperty, v)
+        and set(v : String) = x.SetValue(HeaderTextProperty, v)
 
     member x.HeaderText
         with get() = x.GetValue(HeaderTextProperty) :?> string
-        and set(v) = x.SetValue(HeaderTextProperty, v)
+        and set(v : String) = x.SetValue(HeaderTextProperty, v)
 
     member x.ExcludeFromFullSearch
         with get() = x.GetValue(ExcludeFromFullSearchProperty) :?> bool
-        and set(v) = x.SetValue(ExcludeFromFullSearchProperty, v)
+        and set(v : bool) = x.SetValue(ExcludeFromFullSearchProperty, v)
 
     override x.ToString() =
         String.Format("MappingName - {0} / HeaderText - {1}")
@@ -83,18 +83,18 @@ type SearchBox() as this =
 
     member x.ItemsSource 
         with get() = x.GetValue(ItemsSourceProperty) :?> IEnumerable
-        and set(v) = x.SetValue(ItemsSourceProperty, v)
+        and set(v : IEnumerable) = x.SetValue(ItemsSourceProperty, v)
 
     member x.SearchText
         with get() = x.GetValue(SearchTextProperty) :?> string
-        and set(v) = x.SetValue(SearchTextProperty, v)
+        and set(v : String) = x.SetValue(SearchTextProperty, v)
 
     member x.Columns
         with get() = columns
 
     member x.WaterMarkText
         with get() = x.GetValue(WaterMarkTextProperty) :?> string
-        and set(v) = x.SetValue(WaterMarkTextProperty, v)
+        and set(v : String) = x.SetValue(WaterMarkTextProperty, v)
 
     member private x.OnItemsSourceChanged(itemsSource : IEnumerable) =
         let view = x.GetDefaultView()

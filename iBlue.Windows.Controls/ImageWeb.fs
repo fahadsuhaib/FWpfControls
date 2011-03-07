@@ -83,7 +83,7 @@ type ImageWeb() =
     member x.ImageUrl
         with get() =
             x.GetValue(ImageUrlProperty) :?> string
-        and set(v) =
+        and set(v : String) =
             x.SetValue(ImageUrlProperty, v)
 
     member x.WebRequestCreated = webRequestCreated.Publish

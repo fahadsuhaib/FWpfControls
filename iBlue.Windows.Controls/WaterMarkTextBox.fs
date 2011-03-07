@@ -27,11 +27,11 @@ type WaterMarkTextBox() as this =
 
     member x.WaterMarkText
         with get() = x.GetValue(WaterMarkTextProperty) :?> string
-        and set(v) = x.SetValue(WaterMarkTextProperty, v)
+        and set(v : String) = x.SetValue(WaterMarkTextProperty, v)
 
     member x.Text
         with get() = x.GetValue(TextProperty) :?> string
-        and set(v) = x.SetValue(TextProperty, v)
+        and set(v : String) = x.SetValue(TextProperty, v)
 
     override this.OnApplyTemplate() =
         eventBag.Clear()
