@@ -1,0 +1,28 @@
+﻿<Window x:Class="Samples.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:iBlue.Windows.Controls;assembly=iBlue.Windows.Controls"
+        Title="MainWindow" Height="480" Width="640">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48*" />
+            <RowDefinition Height="393*" />
+        </Grid.RowDefinitions>
+        <controls:SearchBox x:Name="searchBox" WaterMarkText="Enter Search Text" ItemsSource="{Binding}">
+            <controls:SearchBox.Columns>
+                <controls:SearchBoxColumn MappingName="EmployeeID" HeaderText="ID" />
+                <controls:SearchBoxColumn MappingName="Name" />
+            </controls:SearchBox.Columns>
+        </controls:SearchBox>
+        <ListBox Grid.Row="1" Name="listBox1" ItemsSource="{Binding}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding EmployeeID}" Margin="2"/>
+                        <TextBlock Text="{Binding Name}" Margin="2" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>
