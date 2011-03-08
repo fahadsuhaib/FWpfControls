@@ -35,7 +35,6 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Resource Include="Themes\generic.xaml" />
-	<Resource Include="Themes\AutoCompleteTextBoxTemplate.xaml" />
     <Compile Include="WaterMarkTextBox.fs" />
     <Compile Include="SearchBox.fs" />
     <Compile Include="ImageWeb.fs" />
