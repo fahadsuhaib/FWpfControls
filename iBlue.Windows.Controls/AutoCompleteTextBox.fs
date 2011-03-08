@@ -11,50 +11,43 @@ open System.Windows.Documents
 open System.ComponentModel
 open System.Text.RegularExpressions
 open System.Linq
+open System.Windows.Input
+
+type internal FrameworkElementContextWrapper() =
+    inherit FrameworkElement()
+
+    static let ValueProperty = DependencyProperty.Register("Value", typeof<Object>, typeof<FrameworkElementContextWrapper>, new PropertyMetadata(null))
+    member x.Value 
+        with get() = x.GetValue(ValueProperty)
+        and set(v) = x.SetValue(ValueProperty, v)
+
+    member x.SetBindingForValue(binding : Binding) =
+        let previousBinding = x.GetBindingExpression(ValueProperty)
+        if previousBinding <> null then
+            x.ClearValue(ValueProperty)
+        x.SetBinding(ValueProperty, binding) |> ignore
 
 type AutoCompleteMode =
     | FullText = 0
-    | Implicit = 1
-    | AllowExtraText = 2
+    | AllowExtraText = 1
+//    | Implicit = 2
 
 [<AllowNullLiteral>]
-type AutoCompleteTextBox() as this =
-    inherit Control()
-
-    do this.DefaultStyleKey <- typeof<AutoCompleteTextBox>
-    let resourceDict = Application.LoadComponent(new Uri("/iBlue.Windows.Controls;component/Themes/AutoCompleteTextBoxTemplate.xaml", System.UriKind.Relative)) :?> ResourceDictionary          
-    do this.Resources.MergedDictionaries.Add(resourceDict)
+type AutoCompleteTextBox() =
+    inherit TextBox()
 
     static let itemsSourceMetadata =
         new PropertyMetadata
             ( null, new PropertyChangedCallback
                 ( fun dpo args ->
                     (
-                        
+                        let acTextBox = dpo :?> AutoCompleteTextBox
+                        if args.NewValue <> null then
+                            acTextBox.OnItemsSourceChanged(args.NewValue :?> IEnumerable)
                     )                    
                 )
             )
     static let ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof<IEnumerable>, typeof<AutoCompleteTextBox>, itemsSourceMetadata)
-
-    static let displayMemberBindingMetadata =
-        new PropertyMetadata
-            ( null, new PropertyChangedCallback
-                ( fun dpo args ->
-                    (
-                    )
-                )
-            )
-    static let DisplayMemberBindingProperty = DependencyProperty.Register("DisplayMemberBinding", typeof<Binding>, typeof<AutoCompleteTextBox>, displayMemberBindingMetadata)
-
-    static let valueMemberBindingMetadata =
-        new PropertyMetadata
-            ( null, new PropertyChangedCallback
-                ( fun dpo args ->
-                    (
-                    )
-                )
-            )
-    static let ValueMemberBindingProperty = DependencyProperty.Register("ValueMemberBinding", typeof<Binding>, typeof<AutoCompleteTextBox>, valueMemberBindingMetadata)
 
     static let autocompleteModeMetadata =
         new PropertyMetadata
@@ -66,22 +59,107 @@ type AutoCompleteTextBox() as this =
             )
     static let AutoCompleteModeProperty = DependencyProperty.Register("AutoCompleteMode", typeof<AutoCompleteMode>, typeof<AutoCompleteTextBox>, autocompleteModeMetadata)
 
-    let mutable textBox : TextBox = null
-    override this.OnApplyTemplate() =
-        textBox <- this.GetTemplateChild("PART_TextBox") :?> TextBox
+    static let MatchCaseProperty = DependencyProperty.Register("MatchCase", typeof<bool>, typeof<AutoCompleteTextBox>, new PropertyMetadata(false))
+
+    let displayMemberContext = new FrameworkElementContextWrapper()
+    let valueMemberContext   = new FrameworkElementContextWrapper()
+    let mutable displayMemberBinding : Binding = null
+    let mutable displayPropertyPath  : String = String.Empty
+    let mutable valueMemberBinding   : Binding = null
+    let mutable valuePropertyPath    : String = String.Empty
+    let mutable isApplyingText       : bool = false
+    let mutable actualText           : String = String.Empty
+    let mutable shouldProcessKey     : bool = false
+
+    member private x.OnItemsSourceChanged(itemsSource : IEnumerable) =
+        printfn "ItemsSource changed"
 
     member x.ItemsSource
         with get() = x.GetValue(ItemsSourceProperty) :?> IEnumerable
-        and set(v) = x.SetValue(ItemsSourceProperty, v)
+        and set(v : IEnumerable) = x.SetValue(ItemsSourceProperty, v)
 
     member x.DisplayMemberBinding
-        with get() = x.GetValue(DisplayMemberBindingProperty) :?> Binding
-        and set(v) = x.SetValue(DisplayMemberBindingProperty, v)
+        with get() = displayMemberBinding
+        and set(v) = 
+            displayMemberBinding <- v
+            displayMemberContext.SetBindingForValue(v)
 
     member x.ValueMemberBinding
-        with get() = x.GetValue(ValueMemberBindingProperty) :?> Binding
-        and set(v) = x.SetValue(ValueMemberBindingProperty, v)
+        with get() = valueMemberBinding
+        and set(v) =
+            valueMemberBinding <- v
+            valueMemberContext.SetBindingForValue(v)
 
-    member x.AutoCompleteMode
-        with get() = x.GetValue(AutoCompleteModeProperty) :?> AutoCompleteMode
-        and set(v) = x.SetValue(AutoCompleteModeProperty, v)
+    member this.AutoCompleteMode
+        with get() = this.GetValue(AutoCompleteModeProperty) :?> AutoCompleteMode
+        and set(v : AutoCompleteMode) = this.SetValue(AutoCompleteModeProperty, v)
+
+    member x.MatchCase
+        with get() = x.GetValue(MatchCaseProperty) :?> bool
+        and set(v : bool) = x.SetValue(MatchCaseProperty, v)
+
+    override x.OnPreviewKeyDown(e : KeyEventArgs) =
+        // Console.WriteLine("Text {0}", e.Key.ToString())
+        // backspace / delete - based on caretindex / selectionlength update the actualtext
+        match e.Key with
+        | Key.Back -> 
+            shouldProcessKey <- true
+        | Key.Delete ->
+            shouldProcessKey <- true
+        | Key.Space ->
+            shouldProcessKey <- true
+        | _ -> ()
+                
+    override x.OnTextInput(e : TextCompositionEventArgs) =
+        actualText <- actualText + e.Text
+        if x.AutoCompleteMode = AutoCompleteMode.FullText then
+            let text = x.FindTextFromSource(actualText)
+            if text = String.Empty then
+                e.Handled <- true
+        base.OnTextInput(e)
+
+    override x.OnTextChanged(e : TextChangedEventArgs) =
+        if isApplyingText then
+            base.OnTextChanged(e)
+
+        if shouldProcessKey then
+            actualText <- x.Text
+            shouldProcessKey <- false
+        else
+            let text = x.FindTextFromSource(actualText)
+            // type a character "A"
+            // this should be validated against the underlying source based on DisplayMember
+            if text <> String.Empty then
+                isApplyingText <- true
+                x.Text <- text
+                x.CaretIndex <- actualText.Length
+                x.Select(actualText.Length, x.Text.Length - 1)
+                isApplyingText <- false
+        base.OnTextChanged(e)
+
+    member private x.FindTextFromSource(enteredText : String) : String =
+        let view = CollectionViewSource.GetDefaultView(x.ItemsSource) :?> ListCollectionView
+        let getValueFromBinding(record : obj) = 
+            displayMemberContext.DataContext <- record
+            displayMemberContext.Value
+        let filterPredicate(filterText : String) =
+            new Predicate<_>
+                (
+                    fun (record : obj) ->
+                        let recordVal = getValueFromBinding(record)
+                        if recordVal <> null then                      
+                            if x.MatchCase then  
+                                recordVal.ToString().StartsWith(enteredText)
+                            else 
+                                recordVal.ToString().ToLower().StartsWith(enteredText.ToLower())
+                        else
+                            false
+                )
+        view.Filter <- filterPredicate(enteredText)
+        let mutable result = String.Empty
+        if view.Count > 0 then
+            let record = view.GetItemAt(0)
+            let recordVal = getValueFromBinding(record)
+            if recordVal <> null then
+                result <- recordVal.ToString()
+        result

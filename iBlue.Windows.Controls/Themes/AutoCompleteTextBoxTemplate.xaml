@@ -7,7 +7,11 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:AutoCompleteTextBox}">
-                    <TextBox x:Name="PART_TextBox" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" />
+                    <TextBox x:Name="PART_TextBox" 
+                             BorderBrush="{TemplateBinding BorderBrush}" 
+                             BorderThickness="{TemplateBinding BorderThickness}" 
+                             Text="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Text, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" 
+                             />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
