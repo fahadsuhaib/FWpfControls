@@ -13,22 +13,28 @@ open System.Text.RegularExpressions
 open System.Linq
 open System.Windows.Input
 
+/// <summary>Wrapper class that uses WPF / Silverlight DataBinding engine for getting transformed values</summary>
 type internal FrameworkElementContextWrapper() =
     inherit FrameworkElement()
 
     static let ValueProperty = DependencyProperty.Register("Value", typeof<Object>, typeof<FrameworkElementContextWrapper>, new PropertyMetadata(null))
+    /// Gets / Sets the value that is used for DataBinding
     member x.Value 
         with get() = x.GetValue(ValueProperty)
         and set(v) = x.SetValue(ValueProperty, v)
 
+    /// Sets the DataBinding to the ValueProperty.
     member x.SetBindingForValue(binding : Binding) =
         let previousBinding = x.GetBindingExpression(ValueProperty)
         if previousBinding <> null then
             x.ClearValue(ValueProperty)
         x.SetBinding(ValueProperty, binding) |> ignore
 
+/// AutoCompleteMode enum
 type AutoCompleteMode =
+    /// Mode that searches only the text that is found in the ItemsSource
     | FullText = 0
+    /// Mode that allows extra text apart from the search text found in the ItemsSource
     | AllowExtraText = 1
 //    | Implicit = 2
 
@@ -109,6 +115,9 @@ type AutoCompleteTextBox() =
         | _ -> ()
                 
     override x.OnTextInput(e : TextCompositionEventArgs) =
+        if x.SelectionLength = x.Text.Length then
+            // sometimes if the text is fully selected and text input is fired then we clear out the text
+            actualText <- String.Empty
         actualText <- actualText + e.Text
         if x.AutoCompleteMode = AutoCompleteMode.FullText then
             let text = x.FindTextFromSource(actualText)
