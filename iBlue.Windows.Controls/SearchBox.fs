@@ -13,6 +13,7 @@ open System.Text.RegularExpressions
 open System.Linq
 open iBlue.Core.PropertyDescriptorExtensions
 
+/// <summary>Defines a column that is used by the <see cref="SearchBox" /> control.</summary>
 type SearchBoxColumn() =
     inherit DependencyObject()
 
@@ -35,9 +36,11 @@ type SearchBoxColumn() =
     override x.ToString() =
         String.Format("MappingName - {0} / HeaderText - {1}")
 
-// Name:-searchtext - searches name column
-// searchtext - searches tweet column
-// PostedAt:-searchtext - searches posted at column
+/// <summary>Represents a SearchBox control as in MS Outlook. It also has a WaterMarkText property which 
+/// shows a WaterMark text so you can add custom text as in MS Outlook.</summary>
+/// <para>
+/// 
+/// </para>
 [<AllowNullLiteral>]
 type SearchBox() as this =
     inherit Control()
@@ -59,6 +62,7 @@ type SearchBox() as this =
                     )
                 )                 
             )
+    /// DependencyProperty for ItemsSource property
     static let ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof<IEnumerable>, typeof<SearchBox>, itemsSourceMetadata)
 
     static let searchTextMetadata =
@@ -72,26 +76,32 @@ type SearchBox() as this =
                     )
                 )
             )
+    /// DependencyProperty for SearchText property
     static let SearchTextProperty = DependencyProperty.Register("SearchText", typeof<string>, typeof<SearchBox>, searchTextMetadata)
 
     static let waterMarkTextMetadata = new PropertyMetadata(null)
+    /// DependencyProperty for WaterMarkText property
     static let WaterMarkTextProperty = DependencyProperty.Register("WaterMarkText", typeof<string>, typeof<SearchBox>, waterMarkTextMetadata)
 
     let columns = new ObservableCollection<SearchBoxColumn>()
     let mutable waterMarkTextBox : WaterMarkTextBox = null
     let mutable properties : PropertyDescriptorCollection = null
 
+    /// Gets / sets the ItemsSource property
     member x.ItemsSource 
         with get() = x.GetValue(ItemsSourceProperty) :?> IEnumerable
         and set(v : IEnumerable) = x.SetValue(ItemsSourceProperty, v)
 
+    /// Gets / sets the SearchText property
     member x.SearchText
         with get() = x.GetValue(SearchTextProperty) :?> string
         and set(v : String) = x.SetValue(SearchTextProperty, v)
 
+    /// Gets the columns
     member x.Columns
         with get() = columns
 
+    /// Gets / sets the WaterMarkText property
     member x.WaterMarkText
         with get() = x.GetValue(WaterMarkTextProperty) :?> string
         and set(v : String) = x.SetValue(WaterMarkTextProperty, v)

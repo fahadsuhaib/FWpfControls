@@ -20,7 +20,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
-    <DocumentationFile>bin\Debug\FSharpWpfCustomControlLibrary1.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\iBlue.Windows.Controls.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -39,6 +39,11 @@
     <Compile Include="SearchBox.fs" />
     <Compile Include="ImageWeb.fs" />
     <Compile Include="AutoCompleteTextBox.fs" />
+    <Compile Include="NumericTextBoxBase.fs" />
+    <Compile Include="IntegerTextBox.fs" />
+    <Compile Include="DoubleTextBox.fs" />
+    <Compile Include="DateTimeTextBox.fs" />
+    <Compile Include="MaskTextBox.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
