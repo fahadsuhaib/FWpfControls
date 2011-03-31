@@ -11,7 +11,7 @@ open System.Windows.Documents
 open System.ComponentModel
 open System.Text.RegularExpressions
 open System.Linq
-open iBlue.Core.PropertyDescriptorExtensions
+open iBlue.ComponentModel.PropertyDescriptorExtensions
 
 /// <summary>Defines a column that is used by the <see cref="SearchBox" /> control.</summary>
 type SearchBoxColumn() =

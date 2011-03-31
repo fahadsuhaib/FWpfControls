@@ -48,6 +48,8 @@
     <Compile Include="AsyncHelpers.fs" />
     <Compile Include="AsyncWorker%27T.fs" />
     <Compile Include="FrameworkElementWrapper.fs" />
+    <Compile Include="ViewModelBase.fs" />
+    <Compile Include="WPFUtils.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />

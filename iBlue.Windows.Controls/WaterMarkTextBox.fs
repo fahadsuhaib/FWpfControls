@@ -56,6 +56,7 @@ type WaterMarkTextBox() as this =
         eventBag.Add("MouseDown", mouseDown)
         eventBag.Add("LostFocus", lostFocus)
         this.GotoWaterMarkVisualState()
+        base.OnApplyTemplate()
 
     override this.OnGotFocus(e) =
         if searchTextBox <> null then

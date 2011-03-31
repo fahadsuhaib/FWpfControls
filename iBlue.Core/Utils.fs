@@ -1,4 +1,4 @@
-﻿namespace iBlue.Core
+﻿namespace iBlue.ComponentModel
 open System
 open System.Collections
 open System.Linq
