@@ -35,6 +35,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Resource Include="Themes\generic.xaml" />
+	<Resource Include="Themes\ViewPort3DHost.xaml" />
     <Compile Include="Media3D\ViewPort3DHost.fs" />
     <Compile Include="WaterMarkTextBox.fs" />
     <Compile Include="SearchBox.fs" />
@@ -43,8 +44,7 @@
     <Compile Include="NumericTextBoxBase.fs" />
     <Compile Include="IntegerTextBox.fs" />
     <Compile Include="DoubleTextBox.fs" />
-    <Compile Include="MaskTextBox.fs" />
-    <Resource Include="Themes\ViewPort3DHost.xaml" />
+    <Compile Include="MaskTextBox.fs" />    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
