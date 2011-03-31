@@ -3,6 +3,7 @@ This project uses F# to build WPF custom controls. Below is the list of controls
 - AutoCompleteTextBox
 - ImageWeb
 - SearchBox
+- ViewPortHost3D
 - DateTimeTextBox
 - DoubleTextBox
 - IntegerTextBox
