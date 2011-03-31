@@ -38,9 +38,15 @@ type SearchBoxColumn() =
 
 /// <summary>Represents a SearchBox control as in MS Outlook. It also has a WaterMarkText property which 
 /// shows a WaterMark text so you can add custom text as in MS Outlook.</summary>
-/// <para>
-/// 
-/// </para>
+/// <remarks>
+/// SearchBox control allows binding to any IEnumerable and search over its properties. The properties 
+/// are defined in the Columns. The SearchBox also follows a convention of searching over text in these
+/// columns.
+/// It follows a convention of searching over text,
+/// StartsWith - "%SearchText", starts with the "%" operand.
+/// EndsWith - "SearchText%", ends with the "%" operand.
+/// Contains - "SearchText", just text to do contains search.
+/// </remarks>
 [<AllowNullLiteral>]
 type SearchBox() as this =
     inherit Control()

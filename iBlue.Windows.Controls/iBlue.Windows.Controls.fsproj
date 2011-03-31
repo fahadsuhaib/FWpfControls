@@ -42,7 +42,6 @@
     <Compile Include="NumericTextBoxBase.fs" />
     <Compile Include="IntegerTextBox.fs" />
     <Compile Include="DoubleTextBox.fs" />
-    <Compile Include="DateTimeTextBox.fs" />
     <Compile Include="MaskTextBox.fs" />
   </ItemGroup>
   <ItemGroup>

@@ -12,23 +12,7 @@ open System.ComponentModel
 open System.Text.RegularExpressions
 open System.Linq
 open System.Windows.Input
-
-/// <summary>Wrapper class that uses WPF / Silverlight DataBinding engine for getting transformed values</summary>
-type internal FrameworkElementContextWrapper() =
-    inherit FrameworkElement()
-
-    static let ValueProperty = DependencyProperty.Register("Value", typeof<Object>, typeof<FrameworkElementContextWrapper>, new PropertyMetadata(null))
-    /// Gets / Sets the value that is used for DataBinding
-    member x.Value 
-        with get() = x.GetValue(ValueProperty)
-        and set(v) = x.SetValue(ValueProperty, v)
-
-    /// Sets the DataBinding to the ValueProperty.
-    member x.SetBindingForValue(binding : Binding) =
-        let previousBinding = x.GetBindingExpression(ValueProperty)
-        if previousBinding <> null then
-            x.ClearValue(ValueProperty)
-        x.SetBinding(ValueProperty, binding) |> ignore
+open iBlue.Windows
 
 /// AutoCompleteMode enum
 type AutoCompleteMode =
@@ -67,16 +51,37 @@ type AutoCompleteTextBox() =
 
     static let MatchCaseProperty = DependencyProperty.Register("MatchCase", typeof<bool>, typeof<AutoCompleteTextBox>, new PropertyMetadata(false))
 
-    let displayMemberContext = new FrameworkElementContextWrapper()
-    let valueMemberContext   = new FrameworkElementContextWrapper()
+    let displayMemberContext                   = new FrameworkElementContextWrapper()
+    let valueMemberContext                     = new FrameworkElementContextWrapper()
     let mutable displayMemberBinding : Binding = null
     let mutable valueMemberBinding   : Binding = null
-    let mutable isApplyingText       : bool = false
-    let mutable actualText           : String = String.Empty
-    let mutable shouldProcessKey     : bool = false
+    let mutable isApplyingText       : bool    = false
+    let mutable actualText           : String  = String.Empty
+    let mutable shouldProcessKey     : bool    = false
+    let mutable view                 : ICollectionView = null
+
+    let getValueFromBinding(record : obj) = 
+        displayMemberContext.DataContext <- record
+        displayMemberContext.Value
+
+    member private x.OnFilterPredicate(enteredText : String) =
+        new Predicate<_>
+            (
+                fun (record : obj) ->
+                    let recordVal = getValueFromBinding(record)
+                    if recordVal <> null then                      
+                        if x.MatchCase then  
+                            recordVal.ToString().StartsWith(enteredText)
+                        else 
+                            recordVal.ToString().ToLower().StartsWith(enteredText.ToLower())
+                    else
+                        false
+            )
 
     member private x.OnItemsSourceChanged(itemsSource : IEnumerable) =
         printfn "ItemsSource changed"
+        let view = CollectionViewSource.GetDefaultView(x.ItemsSource) :?> ListCollectionView
+        view.Filter <- null
 
     member x.ItemsSource
         with get() = x.GetValue(ItemsSourceProperty) :?> IEnumerable
@@ -145,27 +150,11 @@ type AutoCompleteTextBox() =
         base.OnTextChanged(e)
 
     member private x.FindTextFromSource(enteredText : String) : String =
-        let view = CollectionViewSource.GetDefaultView(x.ItemsSource) :?> ListCollectionView
-        let getValueFromBinding(record : obj) = 
-            displayMemberContext.DataContext <- record
-            displayMemberContext.Value
-        let filterPredicate(filterText : String) =
-            new Predicate<_>
-                (
-                    fun (record : obj) ->
-                        let recordVal = getValueFromBinding(record)
-                        if recordVal <> null then                      
-                            if x.MatchCase then  
-                                recordVal.ToString().StartsWith(enteredText)
-                            else 
-                                recordVal.ToString().ToLower().StartsWith(enteredText.ToLower())
-                        else
-                            false
-                )
-        view.Filter <- filterPredicate(enteredText)
+        view.Filter <- x.OnFilterPredicate(enteredText)
         let mutable result = String.Empty
-        if view.Count > 0 then
-            let record = view.GetItemAt(0)
+        let listView = view :?> ListCollectionView
+        if listView.Count > 0 then
+            let record = listView.GetItemAt(0)
             let recordVal = getValueFromBinding(record)
             if recordVal <> null then
                 result <- recordVal.ToString()
